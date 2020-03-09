@@ -60,8 +60,7 @@ export default {
       cityOptions: city,
       cinemaInfo: {
         cinema_name: "", //影院名称
-        area: [], //所在城市拼音
-        areaCn:[],  //所在城市转汉子
+        area:[],
         address: "", //详细地址
         lat_lng: "", //影院坐标
         serve_price: 0, //服务费
@@ -95,8 +94,7 @@ export default {
     //改变地区
     changeArea(val){
       this.clearOverlays(this.markers);
-      this.searchService.search(`${this.pinyinToHanzi(val[0])}${this.pinyinToHanzi(val[1])}`);
-      this.cinemaInfo.areaCn = [this.pinyinToHanzi(val[0]),this.pinyinToHanzi(val[1])];
+      this.searchService.search(val[1]);
     },
     //清楚mark
     clearOverlays(overlays){
@@ -111,40 +109,11 @@ export default {
         let {data} = res;
         let proArr = data.province.split(',');
         let cityArr = data.city.split(',');
-        data.area = [`${proArr[1]}`,`${cityArr[1]}`];
-        data.areaCn = [`${proArr[0]}`,`${cityArr[0]}`];
+        data.area = [data.province, data.city];
         this.cinemaInfo = data;
         this.cinemaInfo.lat_lng = `${data.lat},${data.lng}`
         this.getQQMark(data.lat,data.lng);
       })
-    },
-    //拼音转汉字或汉字转拼音
-    pinyinToHanzi(cname){
-      let re = /[a-zA-Z]+/g;
-      let v = null,l=null;
-      if(re.test(cname)){
-        //英文
-        v = 'value';
-        l = 'label'
-      }else{
-        //汉子
-        v = 'label';
-        l = 'value';
-      }
-
-      let i = null;
-      for(i = 0; i<city.length; i++){
-        if(city[i][v] != cname){
-          for(let j = 0; j<city[i].children.length; j++){
-            if(city[i].children[j][v] == cname){
-              return city[i].children[j][l];
-            }
-          }
-        }else{
-          return city[i][l];
-        }
-      }
-      return false;
     },
     //qq地图
     getQQMark( lat= 39.916527,  lng= 116.397128) {
@@ -171,9 +140,8 @@ export default {
         var post = new qq.maps.LatLng(lat, lng)
         g.getAddress(post);
         g.setComplete(function(r){
-          _this.cinemaInfo.address=r.detail.address + r.detail.nearPois[0].name || '';
-          _this.cinemaInfo.area = [_this.pinyinToHanzi(r.detail.addressComponents.province),_this.pinyinToHanzi(r.detail.addressComponents.city)];
-          _this.cinemaInfo.areaCn = [r.detail.addressComponents.province,r.detail.addressComponents.city];
+          _this.cinemaInfo.address = r.detail.nearPois[0].address || '';
+          _this.cinemaInfo.area = [r.detail.addressComponents.province, r.detail.addressComponents.city];
         })
       });
 
