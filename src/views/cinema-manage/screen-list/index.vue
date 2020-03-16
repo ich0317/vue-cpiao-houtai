@@ -9,7 +9,7 @@
                 <el-button type="success" size="medium" @click="addScreen">添加影厅</el-button>
               </el-form-item>
               <el-form-item>
-                <el-button type="info" size="medium" @click="createSeats">创建座位图</el-button>
+                <el-button type="info" size="medium" @click="createSeats" v-if="isAddSeat">创建座位图</el-button>
               </el-form-item>
             </el-form>
           </div>
@@ -182,7 +182,8 @@ export default {
       },
       seatArr: [], //座位图
       markCol: [], //列坐标
-      markRow: [] //行坐标
+      markRow: [], //行坐标
+      isAddSeat: false  //是否显示添加座位按钮 true显示 false不显示
     };
   },
   mounted() {
@@ -229,14 +230,12 @@ export default {
             message: msg,
             type: "error"
           });
+          this.isAddSeat = false;
         } else {
           this.allScreenInfo = data.screen;
           this.currentScreenId = this.seatInit.screen_id = data.screen[0]._id;
+          this.isAddSeat = true;
           this.formatSeat(data.seat);
-          // this.seatInit = {...this.seatInit,...seatRes[0]}
-          // this.seatArr = seatRes[1].seatArr;
-          // this.markCol = seatRes[1].markCol;
-          // this.markRow = seatRes[1].markRow;
         }
       });
     },
@@ -438,7 +437,6 @@ export default {
       getSeat({ screen_id }).then(res => {
         let { data, code, msg } = res;
         if (code == 1) {
-          this.$message.error(msg);
           return;
         }
         this.formatSeat(data);

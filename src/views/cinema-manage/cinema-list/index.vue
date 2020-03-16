@@ -14,7 +14,7 @@
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" size="medium" @click="search">查询</el-button>
-                <el-button size="medium" @click="addCinema">添加影院</el-button>
+                <!-- <el-button size="medium" @click="addCinema">添加影院</el-button> -->
               </el-form-item>
             </el-form>
           </div>
@@ -37,7 +37,7 @@
             <el-button @click="edit(scope.row)" type="primary" size="mini">编辑</el-button>
             <el-button @click="inScreen(scope.row)" size="mini">影厅</el-button>
             <el-button @click="inPlan(scope.row)" type="warning" size="mini">排期</el-button>
-            <el-button @click="del(scope.row)" type="danger" size="mini">删除</el-button>
+            <!-- <el-button @click="del(scope.row)" type="danger" size="mini">删除</el-button> -->
           </template>
         </el-table-column>
       </el-table>
