@@ -1,7 +1,7 @@
 <template>
   <div id="createseat">
-    <el-row>
-      <el-col :span="24">
+    <el-row class="parameter-bar">
+      <el-col :span="12">
         <div class="pan-box">
           <div class="pan-form">
             <el-form inline class="demo-form-inline">
@@ -14,6 +14,36 @@
             </el-form>
           </div>
         </div>
+      </el-col>
+      <el-col :span="12">
+        <!-- 回显修改影厅信息 -->
+          <el-form :inline="true" ref="nowScreenInfo" :model="nowScreenInfo" :rules="rules" class="screen-infoshow">
+            <div>
+              <el-form-item label="影厅名称" prop="screen_name">
+                <el-input placeholder="影厅名称" size="mini" style="width:180px;" v-model="nowScreenInfo.screen_name"></el-input>
+              </el-form-item>
+              <el-form-item label="影厅类型" prop="screen_type">
+                <el-select  placeholder="影厅类型" size="mini" style="width:180px;" v-model="nowScreenInfo.screen_type">
+                  <el-option label="普通" value="普通"></el-option>
+                  <el-option label="旗舰" value="旗舰"></el-option>
+                </el-select>
+              </el-form-item>
+            </div>
+            <div>
+              <el-form-item label="音响类型" prop="sound_type">
+                <el-select  placeholder="音响类型" size="mini" style="width:180px;" v-model="nowScreenInfo.sound_type">
+                  <el-option label="普通" value="普通"></el-option>
+                  <el-option label="高端" value="高端"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="状态" prop="screen_status">
+                <el-switch size="mini" v-model="nowScreenInfo.screen_status"></el-switch>
+              </el-form-item>
+              <el-form-item>
+                <el-button size="mini" type="primary" @click="changeScreenInfo('nowScreenInfo')">修改</el-button>
+              </el-form-item>
+            </div>
+          </el-form>
       </el-col>
     </el-row>
     <div class="map-box">
@@ -82,17 +112,19 @@
     <inputBox :isBoxShow.sync="isScreenBox" @hideBox="dataHide" :title="boxTitle">
       <!-- 新建影厅表单 -->
       <div class="form-wrap" v-show="isSeatOrScreen == 0">
-        <el-form label-position="right" label-width="100px">
-          <el-form-item label="影厅名称" style="width:90%;">
+        <el-form label-position="right" label-width="100px" ref="screenInfo"
+        :model="screenInfo"
+        :rules="rules">
+          <el-form-item label="影厅名称" style="width:90%;" prop="screen_name">
             <el-input size="medium" v-model="screenInfo.screen_name"></el-input>
           </el-form-item>
-          <el-form-item label="影厅类型" style="width:90%;">
+          <el-form-item label="影厅类型" style="width:90%;" prop="screen_type">
             <el-select size="medium" placeholder="请选择" v-model="screenInfo.screen_type">
               <el-option label="普通" value="普通"></el-option>
               <el-option label="旗舰" value="旗舰"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="音响类型" placeholder="请选择" style="width:90%;">
+          <el-form-item label="音响类型" placeholder="请选择" style="width:90%;" prop="sound_type">
             <el-select size="medium" v-model="screenInfo.sound_type">
               <el-option label="普通" value="普通"></el-option>
               <el-option label="高端" value="高端"></el-option>
@@ -102,7 +134,7 @@
             <el-switch size="medium" v-model="screenInfo.screen_status"></el-switch>
           </el-form-item>
           <el-form-item>
-            <el-button size="medium" type="primary" @click="submitScreen">添加</el-button>
+            <el-button size="medium" type="primary" @click="submitScreen('screenInfo')">添加</el-button>
             <el-button size="medium" @click="cancelScreen">取消</el-button>
           </el-form-item>
         </el-form>
@@ -160,13 +192,33 @@ export default {
       listLoading: true,
       isScreenBox: false,
       boxTitle: "提示",
-      //添加影厅信息
+      //新添加影厅信息
       screenInfo: {
         screen_name: "",
         screen_type: "",
         sound_type: "",
         screen_status: true,
         cinema_id: ""
+      },
+      //已添加影厅信息
+      nowScreenInfo:{
+        screen_name:"",
+        screen_type:"",
+        sound_type:"",
+        screen_status:false,
+        cinema_id:"",
+        _id:""
+      },
+      rules: {
+        screen_name: [
+          { required: true, message: "请输入影厅名称", trigger: "blur" }
+        ],
+        screen_type: [
+          { required: true, message: "请输入影厅类型", trigger: "blur" }
+        ],
+        sound_type: [
+          { required: true, message: "请输入音响类型", trigger: "blur" }
+        ]
       },
       allScreenInfo: [], //影厅列表
       cinema_id: "", //当前影院id
@@ -206,20 +258,54 @@ export default {
       this.isScreenBox = data;
     },
     //提交新建影厅
-    submitScreen() {
-      addScreen(this.screenInfo).then(res => {
-        let { msg, data } = res;
-        this.cancelScreen();
-        this.getScreenList();
-        for (let name in this.screenInfo) {
-          if (name == "screen_status") continue;
-          this.screenInfo[name] = "";
+    submitScreen(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          addScreen(this.screenInfo).then(res => {
+            let { msg, data } = res;
+            this.cancelScreen();  //关闭添加窗口
+            this.getScreenList();
+            for (let name in this.screenInfo) {
+              if (name == "screen_status") continue;
+              this.screenInfo[name] = "";
+            }
+            this.$message({
+              message: msg,
+              type: "success"
+            });
+          });
+        }else{
+          return false;
         }
-        this.$message({
-          message: msg,
-          type: "success"
-        });
-      });
+      })
+    },
+    //修改影厅信息
+    changeScreenInfo(formName){
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          //如果有_id 说明是修改影厅信息
+          addScreen(this.nowScreenInfo).then(res => {
+            let { data, code, msg } = res;
+              if (code === 0) {
+                this.allScreenInfo.forEach(v=>{
+                  if(v._id === this.nowScreenInfo._id){
+                    v = this.nowScreenInfo;
+                  }
+                })
+                console.log(this.allScreenInfo);
+                this.$message({
+                  message: msg,
+                  type: "success"
+                });
+              }else{
+                this.$message({
+                  message: msg,
+                  type: "error"
+                });
+              }
+          })
+        }
+      })
     },
     //获取影厅和默认座位
     async getScreenList() {
@@ -233,6 +319,7 @@ export default {
           this.isAddSeat = false;
         } else {
           this.allScreenInfo = data.screen;
+          this.nowScreenInfo = {...data.screen[0]};
           this.currentScreenId = this.seatInit.screen_id = data.screen[0]._id;
           this.isAddSeat = true;
           this.formatSeat(data.seat);
@@ -439,6 +526,7 @@ export default {
         if (code == 1) {
           return;
         }
+        this.nowScreenInfo = {...this.allScreenInfo.filter(v=>v._id === screen_id)[0]};
         this.formatSeat(data);
       });
     }
@@ -453,16 +541,18 @@ export default {
   right: 0;
   top: 0;
   bottom: 0;
-  .el-form-item__label {
-    padding: 0;
-    line-height: 2;
+  .form-wrap .el-form-item__label {
+    padding-top: 0!important;
+  }
+  .parameter-bar{
+    position: relative;
   }
   .screen-name-bar {
     padding: 0 20px;
     background: #f8f8f8;
     border-bottom: 1px solid #ddd;
+    height: 37px;
     span {
-      display: inline-block;
       padding: 0 15px;
       height: 36px;
       line-height: 36px;
@@ -474,6 +564,7 @@ export default {
       top: 1px;
       cursor: pointer;
       margin-right: 10px;
+      float: left;
     }
     .active {
       background: #fff;
@@ -550,6 +641,18 @@ export default {
     bottom: 100px;
     background: #fff;
     border-bottom: 1px solid #ddd;
+  }
+  .screen-infoshow {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 99;
+    .el-form-item{
+      margin-bottom: 10px;
+    }
+    .el-form-item__error{
+      padding-top: 0;
+    }
   }
 }
 </style>

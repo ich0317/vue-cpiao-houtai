@@ -45,12 +45,11 @@
         <el-table-column prop="cinema_name" label="影院名称" width="150"></el-table-column>
         <el-table-column prop="seat" label="购买张数" width="80" align="center"></el-table-column>
         <el-table-column prop="total_price" label="订单金额（元）" width="100" align="center"></el-table-column>
-        <el-table-column prop="pay_price" label="支付金额（元）" width="100" align="center"></el-table-column>
-        <el-table-column prop="serve_price" label="服务费（元）" width="100" align="center"></el-table-column>
-        <el-table-column prop="status" label="订单状态"  align="center">
+        <el-table-column prop="total_serveprice" label="服务费（元）" width="100" align="center"></el-table-column>
+        <el-table-column prop="order_status" label="订单状态"  align="center">
           <template slot-scope="scope" width="100">
-          <span :class="{'payed':scope.row.status == '已支付','unpay':scope.row.status == '待支付','refund':scope.row.status == '已退款','closed':scope.row.status == '已关闭'}">
-            {{scope.row.status}}
+          <span :class="{'payed':scope.row.order_status == '已支付','unpay':scope.row.order_status == '待支付','refund':scope.row.order_status == '已退款','closed':scope.row.order_status == '已关闭'}">
+            {{scope.row.order_status}}
           </span>
           </template>
         </el-table-column>
@@ -89,10 +88,10 @@ export default {
         total:null
       },
       ORDER_STATUS:{
-        0:'待支付',
-        1:'已支付',
-        2:'已退款',
-        3:'已关闭'
+        100:'待支付',
+        200:'已支付',
+        300:'已退款',
+        600:'已关闭'
       }
     }
   },
@@ -130,7 +129,7 @@ export default {
   computed:{
     listFormat(){
       this.list.forEach(v=>{
-        v.status = this.ORDER_STATUS[v.status];
+        v.order_status = this.ORDER_STATUS[v.order_status];
         v.seat = v.seat.length;
       })
       return this.list;
