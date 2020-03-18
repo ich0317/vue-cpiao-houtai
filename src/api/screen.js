@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-//添加影厅
+// 添加影厅
 export function addScreen(data) {
   return request({
     url: '/api/addScreen',
@@ -9,16 +9,16 @@ export function addScreen(data) {
   })
 }
 
-//获取影厅
+// 获取影厅
 export function getScreen(data) {
   return request({
     url: '/api/getScreen',
     method: 'get',
-    params:data
+    params: data
   })
 }
 
-//设置座位
+// 设置座位
 export function addSeat(data) {
   return request({
     url: '/api/addSeat',
@@ -27,10 +27,19 @@ export function addSeat(data) {
   })
 }
 
-//获取座位
+// 获取座位
 export function getSeat(data) {
   return request({
     url: '/api/getSeat',
+    method: 'post',
+    data
+  })
+}
+
+// 删除影厅
+export function delScreen(data) {
+  return request({
+    url: '/api/delScreen',
     method: 'post',
     data
   })

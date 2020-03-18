@@ -41,6 +41,7 @@
               </el-form-item>
               <el-form-item>
                 <el-button size="mini" type="primary" @click="changeScreenInfo('nowScreenInfo')">修改</el-button>
+                <el-button size="mini" type="danger" @click="removeScreen">删除</el-button>
               </el-form-item>
             </div>
           </el-form>
@@ -178,7 +179,7 @@
 
 <script>
 import inputBox from "@/components/Inputbox/index";
-import { addScreen, getScreen, addSeat, getSeat } from "@/api/screen";
+import { addScreen, getScreen, addSeat, getSeat, delScreen } from "@/api/screen";
 import { initSeatMap } from "./createSeat.js";
 import { findInArr } from "@/utils/index.js";
 import goBack from "@/components/Backone/index";
@@ -286,23 +287,15 @@ export default {
           //如果有_id 说明是修改影厅信息
           addScreen(this.nowScreenInfo).then(res => {
             let { data, code, msg } = res;
-              if (code === 0) {
-                this.allScreenInfo.forEach(v=>{
-                  if(v._id === this.nowScreenInfo._id){
-                    v = this.nowScreenInfo;
-                  }
-                })
-                console.log(this.allScreenInfo);
-                this.$message({
-                  message: msg,
-                  type: "success"
-                });
-              }else{
-                this.$message({
-                  message: msg,
-                  type: "error"
-                });
-              }
+              this.allScreenInfo.forEach((v, i)=>{
+                if(v._id === this.nowScreenInfo._id){
+                  this.allScreenInfo.splice(i, 1, this.nowScreenInfo)
+                }
+              })
+              this.$message({
+                message: msg,
+                type: "success"
+              });
           })
         }
       })
@@ -450,12 +443,14 @@ export default {
       }
  
       addSeat({ seat: arr }).then(res => {
-        let { msg , data } = res;
-        this.formatSeat(data);
-        this.$message({
-          message: msg,
-          type: "success"
-        });
+        let { msg, data } = res;
+      
+          this.formatSeat(data);
+          this.$message({
+            message: msg,
+            type: "success"
+          });
+    
       });
     },
     //回显座位格式处理
@@ -523,12 +518,36 @@ export default {
       this.markRow = [];
       getSeat({ screen_id }).then(res => {
         let { data, code, msg } = res;
-        if (code == 1) {
-          return;
-        }
         this.nowScreenInfo = {...this.allScreenInfo.filter(v=>v._id === screen_id)[0]};
         this.formatSeat(data);
       });
+    },
+    // 删除影厅
+    removeScreen(){
+      this.$confirm('确定删除该影厅?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          delScreen({_id:this.currentScreenId}).then(res=>{
+            let { msg, data, code } = res;
+            if(code === 0){
+              this.getScreenList();
+              this.$message({
+                message: msg,
+                type: "success"
+              });
+            }else{
+              this.$message({
+                message: msg,
+                type: "error"
+              });
+            }
+          })
+        }).catch(() => {
+                   
+        });
+      
     }
   }
 };
